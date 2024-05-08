@@ -1,28 +1,34 @@
 #include <iostream>
-#include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <stdio.h>
-#include <unistd.h>
 #include <pcap/socket.h>
 
-#define endl "\n"
 using namespace std;
 
 int main(int argc, char* argv[]) {
-    int sockfd = socket(AF_INET, SOCK_STREAM, 0); // TCP 소켓 생성
-    if (sockfd == -1) {
-        cerr << "소켓 생성 실패" << endl;
+//    if(argc!=2){
+//        printf("다음과 같이 실행하십시오.\n");
+//        printf("    nameResilve host_name\n");
+//        return 1;
+//    }
+    hostent* remoteHost;
+//    remoteHost=gethostbyname(argv[1]);
+    remoteHost=gethostbyname("www.naver.com");
+    if(remoteHost==NULL){
+        printf("호스트 이름 리졸브 오류");
         return 1;
     }
-    cout << "소켓 생성 성공" << endl;
-
-    int dataSocket=socket(AF_INET,SOCK_STREAM,IPPROTO_TCP);
-    if(dataSocket==INVALID_SOCKET){
-        cout<<"소켓 생성 실패"<<endl;
+    printf("호스트 이름 : %d\n", remoteHost->h_name);
+    char** pAlias;
+    for(pAlias=remoteHost->h_aliases;*pAlias!=NULL; pAlias++){
+        printf("별명: %s\n",*pAlias);
     }
-
-    close(sockfd); // 소켓 종료
-    cout << "소켓을 종료합니다." << endl;
-    return 0;
+    in_addr addr;
+    int i=0;
+    while(remoteHost->h_addr_list[i]!=NULL){
+        addr.s_addr=*(unsigned long *)remoteHost->h_addr_list[i];
+        printf("IP 주소 %s\n",inet_ntoa(addr));
+        i++;
+    }
 }
